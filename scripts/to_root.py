@@ -1,10 +1,11 @@
 import os
 from array import array
 
-from config import settings
-from common import utils
-from data import data, process
 from root_numpy import array2root
+
+from common import utils
+from config import settings
+from data import load, process
 
 feature_name_map = {'RMass1234': 'Mass_invar'}
 RUN_DIR = settings.get_setting('Event Selection', 'run_dir')
@@ -18,8 +19,8 @@ def write_root(run_dir, filename, X, weights):
 
 
 def to_root(run_dir):
-    model = data.load_model(run_dir)
-    X_test, y_test, test_index = data.load_train_test_data_from_run_dir(
+    model = load.load_model(run_dir)
+    X_test, y_test, test_index = load.load_train_test_data_from_run_dir(
         run_dir, 'test', get_indices=True)
     config = utils.load_run_config(run_dir)
     model_name = config['DATA']['model']

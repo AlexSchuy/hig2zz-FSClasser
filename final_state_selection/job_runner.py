@@ -8,8 +8,8 @@ from argparse import ArgumentParser
 from configparser import ConfigParser
 from glob import glob
 
-from config import settings
 from common import utils
+from config import settings
 
 SETUP_DIR = settings.get_setting('Final State Selection', 'setup_dir')
 OUTPUT_DIR = settings.get_setting('Final State Selection', 'output_dir')
@@ -19,8 +19,11 @@ STEERING_DIR = settings.get_setting('Final State Selection', 'steering_dir')
 TEMPLATE_DIR = settings.get_setting('Final State Selection', 'template_dir')
 MACHINES = settings.get_setting('Final State Selection', 'machines')
 SAMPLE_TABLE = settings.get_setting('Final State Selection', 'sample_table')
-NUM_EVENTS_TABLE = settings.get_setting('Final State Selection', 'num_events_table')
-SETUP_TABLE = settings.get_setting('Final State Selection', 'environment_setup_table')
+NUM_EVENTS_TABLE = settings.get_setting(
+    'Final State Selection', 'num_events_table')
+SETUP_TABLE = settings.get_setting(
+    'Final State Selection', 'environment_setup_table')
+
 
 def exists(name, output_dir):
     return os.path.isfile(os.path.join(output_dir, name + '.root'))
@@ -36,9 +39,9 @@ def make_steering_file(name, steering_dir, output_dir, version, gen_process, num
             input_files_str += '    ' + file_name + '\n'
     with open(template, 'r') as f:
         data = f.read()
-    data = data.replace('%LCIO_INPUT_FILES', input_files_str)
-    data = data.replace('%MAX_RECORD_NUMBER', str(num_events + 1))
-    data = data.replace('%OUTPUT_ROOT_FILE',
+    data = load.replace('%LCIO_INPUT_FILES', input_files_str)
+    data = load.replace('%MAX_RECORD_NUMBER', str(num_events + 1))
+    data = load.replace('%OUTPUT_ROOT_FILE',
                         os.path.join(output_dir, name + '.root'))
     steering_file_name = os.path.join(steering_dir, name + '.xml')
     with open(steering_file_name, 'w+') as f:

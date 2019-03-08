@@ -3,15 +3,16 @@ import math
 import os
 from collections import OrderedDict, defaultdict
 
-from config import settings
-from import data, process
 import matplotlib
 import numpy as np
 import pandas as pd
 import uproot
-from common import utils
 from matplotlib import pyplot as plt
 from progressbar import progressbar
+
+from common import utils
+from config import settings
+from data import load, process
 
 PLOT_DIR = settings.get_setting('Event Selection', 'plot_dir')
 default_logx = set()
@@ -135,7 +136,7 @@ def make_standard_hist(version, dataset, processes, feature_keys, weight_type, g
         feature_keys = [feature_keys]
 
     # Get data and separate it into appropriate groups.
-    df, meta = data.load_data(feature_keys, version, dataset, processes, indices=indices, combination_type=combination_type,
+    df, meta = load.load_data(feature_keys, version, dataset, processes, indices=indices, combination_type=combination_type,
                               selection_type=selection_type, selection_stage=selection_stage, use_progressbar=False)
     groups = process.get_groups(version, dataset, group_type)
     features, weights = process.by_group(version, dataset, groups, meta['pid'], [
@@ -171,7 +172,7 @@ def make_standard_hist(version, dataset, processes, feature_keys, weight_type, g
 def make_standard_2d_hist(version, dataset, processes, feature_key_x, feature_key_y, weight_type, group_type, combination_type='highest_pt', selection_type=None, selection_stage=-1, indices=None, filepath=None, histtype='step', **kwargs):
 
     # Get data and separate it into appropriate groups.
-    df, meta = data.load_data([feature_key_x, feature_key_y], version, dataset, processes, indices=indices,
+    df, meta = load.load_data([feature_key_x, feature_key_y], version, dataset, processes, indices=indices,
                               combination_type=combination_type, selection_type=selection_type, selection_stage=selection_stage, use_progressbar=False)
     groups = process.get_groups(version, dataset, group_type)
     features, weights = process.by_group(version, dataset, groups, meta['pid'], [
@@ -241,7 +242,7 @@ def make_truth_study_plots(datasets):
     ylims = {'mc_zmm_m': 30, 'mc_zqq_m': 30, 'dimuon_m': 30, 'dijet_m': 30}
 
     for dataset in datasets:
-        features, _ = data.load_data(['mc_zz_flag', 'is_signal', 'is_mumujj'], 'v4', dataset, [
+        features, _ = load.load_data(['mc_zz_flag', 'is_signal', 'is_mumujj'], 'v4', dataset, [
                                      'nnh_zz'], combination_type=None)
         signal_indices = np.where(features['is_signal'])[0]
         reco_indices = np.where(features['is_mumujj'])[0]
@@ -249,7 +250,7 @@ def make_truth_study_plots(datasets):
         reco_background_indices = np.setdiff1d(reco_indices, signal_indices)
 
         # Compare reco signal and background data sets.
-        reco_features, _ = data.load_data(['dijet_m', 'dimuon_m', 'n_col_reco'], 'v4', dataset, [
+        reco_features, _ = load.load_data(['dijet_m', 'dimuon_m', 'n_col_reco'], 'v4', dataset, [
                                           'nnh_zz'], combination_type=None)
         for feature_key in ['dijet_m', 'dimuon_m', 'n_col_reco']:
             filepath = os.path.join(
@@ -297,11 +298,11 @@ def main():
     parser_features.add_argument('--group', '-g', default='sl_separated', choices=process.GROUP_TYPES,
                                  help='The way individual processes should be grouped for the table (see process module for details).')
     parser_features.add_argument('--combination', '-c', default=None,
-                                 choices=data.COMBINATION_TYPES, help='combination type to use (see data.load_data).')
+                                 choices=load.COMBINATION_TYPES, help='combination type to use (see load.load_data).')
     parser_features.add_argument('--selection', '-s', default=None,
-                                 choices=data.SELECTION_TYPES, help='Selection type to use (see data.load_data).')
+                                 choices=load.SELECTION_TYPES, help='Selection type to use (see load.load_data).')
     parser_features.add_argument('--selection_stage', '-ss', default=-1,
-                                 type=int, help='Selection stage to use (see data.load_data).')
+                                 type=int, help='Selection stage to use (see load.load_data).')
     parser_features.add_argument(
         'dataset', help='The name of the data set to use.')
 

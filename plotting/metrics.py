@@ -5,21 +5,22 @@ procedures.
 
 """
 
-import os
 import argparse
+import os
 from collections import OrderedDict
 
-from config import settings
-from data import data, process
 import graphviz
 import numpy as np
 import pandas as pd
-from plotting import plot
-from common import utils, validate
 from sklearn import tree
 
+from common import utils, validate
+from config import settings
+from data import load, process
+from plotting import plot
 
 RUN_DIR = settings.get_setting('Event Selection', 'run_dir')
+
 
 def cut_table(version, dataset, group_type, combination_type, selection_type):
     groups = process.get_groups(version, dataset, group_type)
@@ -27,9 +28,9 @@ def cut_table(version, dataset, group_type, combination_type, selection_type):
     def count(p, meta):
         return np.sum(meta['pid'] == process.get_pid_map(version, dataset)[p])
     processes = process.get_all_processes(version, dataset)
-    features, meta = data.load_data(
+    features, meta = load.load_data(
         ['RMass12'], version, dataset, processes, combination_type=combination_type)
-    cuts = data.get_selection(meta['pid'], version, dataset,
+    cuts = load.get_selection(meta['pid'], version, dataset,
                               combination_type=combination_type, selection_type=selection_type)
     index = np.concatenate([['initial', 'final_state_selection'],
                             cuts.columns.values, ['sigma', 'efficiency']])
@@ -72,8 +73,8 @@ def analyze_standard(run_dir):
     """Make basic bdt analysis plots."""
 
     # Load run data
-    model = data.load_model(run_dir)
-    X_test, y_test, test_index = data.load_train_test_data_from_run_dir(
+    model = load.load_model(run_dir)
+    X_test, y_test, test_index = load.load_train_test_data_from_run_dir(
         run_dir, 'test', get_indices=True)
     import pdb
     pdb.set_trace()
@@ -147,7 +148,7 @@ def analyze_truth_study(datasets):
     reco_zz_distribution = pd.DataFrame(
         columns=[11, 12, 13, 21, 22, 23, 31, 32, 33], index=datasets)
     for dataset in datasets:
-        features, _ = data.load_data(['mc_zz_flag', 'is_signal', 'is_mumujj'], 'v4', dataset, [
+        features, _ = load.load_data(['mc_zz_flag', 'is_signal', 'is_mumujj'], 'v4', dataset, [
                                      'nnh_zz'], combination_type=None)
         passed_events.loc[dataset, 'mc'] = np.sum(features['is_signal'])
         passed_events.loc[dataset, 'reco'] = np.sum(features['is_mumujj'])
@@ -181,15 +182,15 @@ def main():
     parser_cf = subparsers.add_parser(
         'cutflow', help='Print a cut-flow table for the given selections.')
     parser_cf.add_argument('--combination', '-c', default='highest_pt',
-                           choices=data.COMBINATION_TYPES, help='combination type to use (see data.load_data).')
-    parser_cf.add_argument('--selection', '-s', default=None, choices=data.SELECTION_TYPES,
-                           help='Selection type to use (see data.load_data).')
+                           choices=load.COMBINATION_TYPES, help='combination type to use (see load.load_data).')
+    parser_cf.add_argument('--selection', '-s', default=None, choices=load.SELECTION_TYPES,
+                           help='Selection type to use (see load.load_data).')
     parser_cf.add_argument('--version', '-v', default='v4',
                            choices=process.VERSIONS, help='The CEPC version to use.')
     parser_cf.add_argument('--group_type', '-g', default='sl_separated', choices=process.GROUP_TYPES,
                            help='The way individual processes should be grouped for the table (see process module for details).')
     parser_cf.add_argument('--dataset', '-d', required=True,
-                           help='The name of the job options file that was used when processing the data.')
+                           help='The name of the job options file that was used when processing the load.')
 
     # analyze bdt/dt
     parser_standard = subparsers.add_parser(

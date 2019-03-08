@@ -5,13 +5,15 @@ import os
 import subprocess
 from configparser import ConfigParser
 
-from config import settings
 import progressbar
+
 from common import utils
+from config import settings
 
 MERGED_INPUT_DIR = settings.get_setting('Event Selection', 'merged_fs')
 INPUT_DIR = settings.get_setting('Event Selection', 'fs')
 RAW_INPUT_DIR = settings.get_setting('Common', 'fs_output')
+
 
 def merge_root_files(version, datasets, mc_events_per_file):
     config = ConfigParser()
@@ -88,7 +90,7 @@ def preprocess_data(version, datasets=None):
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Perform necessary synchronization, preprocessing, and merging of data.')
+        description='Perform necessary synchronization, preprocessing, and merging of load.')
     parser.add_argument('function', default='all', choices=[
                         'all', 'synchronize', 'preprocess', 'merge'], help='Operation to perform.')
     parser.add_argument('--datasets', '-d', nargs='+', default=None,

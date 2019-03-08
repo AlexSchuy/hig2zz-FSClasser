@@ -8,15 +8,16 @@ import os
 import shutil
 from configparser import ConfigParser
 
-from config import settings
-from data import data, process
 import numpy as np
-from common import utils
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.externals import joblib
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeClassifier
+
+from common import utils
+from config import settings
+from data import load, process
 
 RUN_DIR = settings.get_setting('Event Selection', 'run_dir')
 
@@ -59,14 +60,14 @@ def main():
     parser.add_argument('--dataset', '-d', required=True,
                         help='The dataset to use.')
     parser.add_argument('--combination_type', '-c', default='highest_pt',
-                        choices=data.COMBINATION_TYPES, help='Combination type to use (see data.load_data).')
+                        choices=load.COMBINATION_TYPES, help='Combination type to use (see load.load_data).')
     parser.add_argument('--selection_type', '-s', default=None,
-                        choices=data.SELECTION_TYPES, help='Selection type to use (see data.load_data).')
+                        choices=load.SELECTION_TYPES, help='Selection type to use (see load.load_data).')
     parser.add_argument('--selection_stage', '-ss', default=None,
-                        type=int, help='Selection stage to use (see data.load_data).')
+                        type=int, help='Selection stage to use (see load.load_data).')
     parser.add_argument('--use_weights', action='store_true')
     parser.add_argument('--clean', action='store_true',
-                        help='If set, clean the run_dir directory before saving new data.')
+                        help='If set, clean the run_dir directory before saving new load.')
     args = parser.parse_args()
     if args.clean:
         try:
@@ -82,9 +83,9 @@ def main():
     run_dir = utils.make_run_dir()
     print('[Train] Results will be stored in {}'.format(run_dir))
     version, processes, feature_keys = read_input_config(args.config)
-    data.update_run_config(version, args.dataset, processes, feature_keys, model=args.model, run_dir=run_dir,
+    load.update_run_config(version, args.dataset, processes, feature_keys, model=args.model, run_dir=run_dir,
                            combination_type=args.combination_type, selection_type=args.selection_type, selection_stage=args.selection_stage)
-    X_train, y_train = data.load_train_test_data_from_run_dir(
+    X_train, y_train = load.load_train_test_data_from_run_dir(
         run_dir, data_type='train')
     y_train = utils.get_binary_labels(y_train, version, args.dataset)
     if args.use_weights:
