@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<!-- ?xml-stylesheet type="text/xsl" href="http://ilcsoft.desy.de/marlin/marlin.xsl"? -->
+<!-- ?xml-stylesheet type="text/xsl" href="marlin.xsl"? -->
+
+<!-- Loading shared library : /workfs/bes/lig/higgs/mymarlin/lib/libmymarlin.so.0.1.0 (libmymarlin.so)-->
+
+<!--##########################################
+    #                                        #
+    #     Example steering file for marlin   #
+    #                                        #
+    ##########################################-->
+
+
+<marlin xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ilcsoft.desy.de/marlin/marlin.xsd">
+<execute>
+  <processor name="RootFileProcessor"/>  
+  <!--processor name="MyLICH"/-->
+  <processor name="MyISOlatedLeptonFinderProcessor"/>
+  <processor name="FastJetClustering"/>
+  <processor name="FSClasserProcessor"/>
+</execute>
+
+<global>
+  <parameter name="LCIOInputFiles">
+      /besfs/groups/higgs/data/SimReco/wo_BS/CEPC_v4/higgs/smart_final_states/E240.Pnnh_zz.e0.p0.whizard195/nnh_zz.e0.p0.00001_0000_dst.slcio
+
+  </parameter>
+  <parameter name="MaxRecordNumber" value="1001" />  
+  <parameter name="SkipNEvents" value="0" />  
+  <parameter name="SupressCheck" value="false" />  
+  <!--parameter name="GearXMLFile"> gear_ILD_o2_v05.xml </parameter-->  
+  <parameter name="GearXMLFile"> /home/bes/lig/higgs/GearOutput_cepcv4.xml </parameter>  
+  <!--parameter name="RandomSeed" value="1234567890" /-->
+  <parameter name="PrintEventNumber" type="int" value="0" /> <!-- 0 for not printing event number, n for printing every n events -->
+  <parameter name="Verbosity" options="DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT"> WARNING </parameter> 
+</global>
+
+<processor name="RootFileProcessor" type="RootFileProcessor">
+  <parameter name="OutputRootFile" type="string">v4_nnh_zz_000_0000.root </parameter>
+</processor>
+
+<processor name="MyLICH" type="LICH">
+	<!--Produce single particle samples for training or produce the charged PID-->
+	<parameter name="EnergyBins" type="FloatVec">-1 20 </parameter>
+	<!--DetectorModules-->
+	<parameter name="InputDetectorModules" type="StringVec">barrel1 barrel2 overlap endcap  </parameter>
+	<!--The interval of energy for PID-->
+	<!--Name of Inpout MC Particle Collection-->
+	<parameter name="InputMCParticle" type="string">MCParticle </parameter>
+	<!--Name of Inpout Reconstructed Particle Collection-->
+	<parameter name="InputPFO" type="string">ArborPFOs </parameter>
+	<!--The interval of angle for PID-->
+	<parameter name="InputPositions" type="FloatVec">0 0.3 0.6 0.8 1  </parameter>
+	<!--Name of Output Reconstructed Particle Collection-->
+	<parameter name="OutputPFO" type="string">LICHPFOs </parameter>
+	<!--The generated energy point choson for training-->
+	<!--Produce sample for training when 0, otherwise proceed the PID-->
+	<parameter name="TrainingFlag" type="int">0 </parameter>
+	<!--The name of the file to which the pion ROOT tree will be written-->
+
+	<!--verbosity level of this processor ("DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT")-->
+	<parameter name="Verbosity" options="DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT"> SILENT </parameter> 
+	<parameter name="weightDir" type="string">/cefs/higgs/yudan/CEPCV4/Reco/TMVA</parameter>
+	<!--parameter name="Verbosity" type="string">DEBUG </parameter-->
+   <parameter name="mvacut_e" type="float">0.5 0.1</parameter>
+   <!--mva value cut for electron-->
+   <parameter name="mvacut_mu" type="float">0.5 0.1</parameter>
+   <!--mva value cut for electron-->
+	<parameter name="mvacut_pi" type="float">0.5 0.5</parameter>
+   <!--the weight file directory-->
+</processor>
+
+
+<processor name="MyISOlatedLeptonFinderProcessor" type="LGISOlatedLeptonFinderProcessor">
+    <!--Input collection of ReconstructedParticles-->
+    <parameter name="InputCollection" type="string" lcioInType="ReconstructedParticle">ArborPFOs </parameter>
+    <!--Output collection of isolated leptons-->
+    <parameter name="OutputCollectionIsolatedLeptons" type="string" lcioOutType="ReconstructedParticle">IsoLeps </parameter>
+    <!--Copy of input collection but without the isolated leptons-->
+    <parameter name="OutputCollectionWithoutIsolatedLepton" type="string" lcioOutType="ReconstructedParticle">RestPFOs </parameter>
+    <!--Output collection of isolated leptons from Z -->
+    <parameter name="OutputCollectionIsolatedZLeptons" type="string" lcioOutType="ReconstructedParticle">IsoZLeps </parameter>
+    <!--Copy of input collection but without the isolated leptons of Z-->
+    <parameter name="OutputCollectionWithoutIsolatedZLepton" type="string" lcioOutType="ReconstructedParticle">RestZPFOs </parameter>
+
+    
+    <parameter name="UsePID" type="bool">true </parameter>
+    <!--Use polynomial cuts on track and cone energy-->
+    <!--Electron ID: Maximum Ecal deposit divided by sum of Ecal and Hcal deposits-->
+    <parameter name="ElectronMaxEcalToHcalFraction" type="float">1.5 </parameter>
+    <!--Electron ID: Minimum Ecal deposit divided by sum of Ecal and Hcal deposits-->
+    <parameter name="ElectronMinEcalToHcalFraction" type="float">0.7 </parameter>
+    <!--Electron ID: Maximum energy deposit divided by momentum-->
+    <parameter name="ElectronMaxEnergyDepositByMomentum" type="float">1.5 </parameter>
+    <!--Electron ID: Minimum energy deposit divided by momentum-->
+    <parameter name="ElectronMinEnergyDepositByMomentum" type="float">0.5 </parameter>
+    <!--Muon ID: Maximum Ecal deposit divided by sum of Ecal and Hcal deposits-->
+    <parameter name="MuonMaxEcalToHcalFraction" type="float">0.4 </parameter>
+    <!--Muon ID: Minimum Ecal deposit divided by sum of Ecal and Hcal deposits-->
+    <parameter name="MuonMinEcalToHcalFraction" type="float">0 </parameter>
+    <!--Muon ID: Maximum energy deposit divided by momentum-->
+    <parameter name="MuonMaxEnergyDepositByMomentum" type="float">0.3 </parameter>
+    <!--Muon ID: Minimum energy deposit divided by momentum-->
+    <parameter name="MuonMinEnergyDepositByMomentum" type="float">0 </parameter>
+    
+    <!--Use impact parameter cuts for consistency with primary/secondary track-->
+    <parameter name="UseImpactParameter" type="bool"> false </parameter>
+    <!--Minimum impact parameter in 3D-->
+    <parameter name="ImpactParameterMin3D" type="float">0 </parameter>
+    <!--Maximum impact parameter in 3D-->
+    <parameter name="ImpactParameterMax3D" type="float">0.01 </parameter>
+    <!--Maximum d0 impact parameter-->
+    <parameter name="ImpactParameterMaxD0" type="float">1e+20 </parameter>
+    <!--Minimum d0 impact parameter-->
+    <parameter name="ImpactParameterMinD0" type="float">0 </parameter>
+    <!--Maximum z0 impact parameter-->
+    <parameter name="ImpactParameterMaxZ0" type="float">1e+20 </parameter>
+    <!--Minimum z0 impact parameter-->
+    <parameter name="ImpactParameterMinZ0" type="float">0 </parameter>
+    
+    <!--Use impact parameter significance cuts for consistency with primary/secondary track-->
+    <parameter name="UseImpactParameterSignificance" type="bool">false  </parameter>
+    <!--Maximum impact parameter significance in 3D-->
+    <parameter name="ImpactParameterMax3DSignificance" type="float">1e+20 </parameter>
+    <!--Minimum impact parameter significance in 3D-->
+    <parameter name="ImpactParameterMin3DSignificance" type="float">0 </parameter>
+    <!--Maximum z0 impact parameter significance-->
+    <parameter name="ImpactParameterMaxZ0Significance" type="float">1e+20 </parameter>
+    <!--Minimum z0 impact parameter significance-->
+    <parameter name="ImpactParameterMinZ0Significance" type="float">0 </parameter>
+    <!--Minimum d0 impact parameter significance-->
+    <parameter name="ImpactParameterMinD0Significance" type="float">0 </parameter>
+    <!--Maximum d0 impact parameter significance-->
+    <parameter name="ImpactParameterMaxD0Significance" type="float">1e+20 </parameter>
+
+    <!--Use rectangular cuts on track and cone energy-->
+    <parameter name="UseRectangularIsolation" type="bool">true   </parameter>
+    <!--Cosine of the half-angle of the cone used in isolation criteria-->
+    <parameter name="CosConeAngle" type="float">0.98 </parameter>
+    <!--Maximum cone energy for isolation requirement-->
+    <parameter name="IsolationMaximumConeEnergy" type="float">1e+20 </parameter>
+    <!--Maximum track energy for isolation requirement-->
+    <parameter name="IsolationMaximumTrackEnergy" type="float">1e+20 </parameter>
+    <!--Minimum cone energy for isolation requirement-->
+    <parameter name="IsolationMinimumConeEnergy" type="float">0 </parameter>
+    <!--Minimum track energy for isolation requirement-->
+    <parameter name="IsolationMinimumTrackEnergy" type="float">3 </parameter>
+    
+    <!--Use primitive particle ID based on calorimeter energy deposits-->
+    <parameter name="UsePolynomialIsolation" type="bool"> false  </parameter>
+    <!--Polynomial cut (A) on track energy and cone energy: Econe^2 < A*Etrk^2+B*Etrk+C-->
+    <parameter name="IsolationPolynomialCutA" type="float"> 0.0  </parameter>
+    <!--Polynomial cut (B) on track energy and cone energy: Econe^2 < A*Etrk^2+B*Etrk+C-->
+    <parameter name="IsolationPolynomialCutB" type="float"> 4.0 </parameter>
+    <!--Polynomial cut (C) on track energy and cone energy: Econe^2 < A*Etrk^2+B*Etrk+C-->
+    <parameter name="IsolationPolynomialCutC" type="float">12.2 </parameter>
+   
+    <!--Use jet-based isolation-->
+    <parameter name="UseJetIsolation" type="bool">false </parameter>
+    <!--Input collection of jets for isolation-->
+    <parameter name="JetCollection" type="string" lcioInType="ReconstructedParticle">JetsForIsolation </parameter>
+    <!--Maximum Xt in jet-based isolation-->
+    <parameter name="JetIsolationVetoMaximumXt" type="float">0.25 </parameter>
+    <!--Maximum Z in jet-based isolation-->
+    <parameter name="JetIsolationVetoMaximumZ" type="float">0.6 </parameter>
+    <!--Minimum Xt in jet-based isolation-->
+    <parameter name="JetIsolationVetoMinimumXt" type="float">0 </parameter>
+    <!--Mininum Z in jet-based isolation-->
+    <parameter name="JetIsolationVetoMinimumZ" type="float">0 </parameter>
+    
+    <!--verbosity level of this processor ("DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT")-->
+    <!--parameter name="Verbosity" type="string">DEBUG </parameter-->
+</processor>
+
+<processor name="FastJetClustering" type="LGFastJetClustering">
+  <!--FastJet Clustering ...-->
+  <!--FastJet algorithm-->
+  <!--parameter name="Algorithm" type="string">antikt_algorithm </parameter-->
+  <parameter name="Algorithm" type="string">ee_kt_algorithm </parameter>
+  <!--debug printout-->
+  <parameter name="Debug" type="int">  0  </parameter>
+  <!--max nb of jets-->
+  <parameter name="NJets" type="int">  2  </parameter>
+  <!--R Parameter-->
+  <parameter name="R"  type="double">0.7  </parameter>
+  <!--Ejet-->
+  <parameter name="EjetMin" type="double">1  </parameter>
+  <!--the minimum number of input PFOs-->
+  <parameter name="nPFOmin" type="double">5  </parameter>
+  <!--tuple-->
+  <parameter name="FillTree" type="int">0 </parameter>
+  <!--Collection of reconstructed particles-->
+  <parameter name="InputCollection" type="string" lcioInType="ReconstructedParticle"> RestPFOs         </parameter>
+  <parameter name="InputMCTruthMap" type="string" lcioInType="LCRelation">            RecoMCTruthLink   </parameter>
+  <!--parameter name="RemoveList" type="doubleVec">                                      91.18 13.0 -13.0       </parameter-->
+  <!--Name of collection with the found jets-->
+  <parameter name="OutputCollection" type="string" lcioOutType="ReconstructedParticle">RefinedJets           </parameter>
+  <!--verbosity level of this processor ("DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT")-->
+  <!--parameter name="Verbosity" type="string">DEBUG </parameter-->
+</processor>
+
+<processor name="AlexFastJetClustering" type="FastJetProcessor">
+  <parameter name="recParticleIn" type="string" lcioOutType="ReconstructedParticle"> RestPFOs </parameter>
+  <parameter name="jetOut" type="string" lcioOutType="ReconstructedParticle">RefinedJets </parameter>
+  <parameter name="algorithm" type="StringVec">ee_kt_algorithm  </parameter>   
+  <parameter name="recombinationScheme" type="string"> E_scheme </parameter>
+  <parameter name="clusteringMode" type="StringVec"> ExclusiveNJets 2 </parameter> 
+</processor>
+
+<processor name="FSClasserProcessor" type="FSClasserProcessor">
+  <!--parameter name="InputMCParticlesCollection" type="string" lcioInType="MCParticle"> MCParticlesSkimmed </parameter-->
+  <parameter name="InputMCParticlesCollection" type="string" lcioInType="MCParticle">            MCParticle       </parameter>
+  <parameter name="InputMCTruthLinkCollection" type="string" lcioInType="LCRelation">            RecoMCTruthLink  </parameter>
+  <parameter name="InputIsoLepsCollection"     type="string" lcioInType="ReconstructedParticle"> IsoLeps        </parameter>
+  <parameter name="InputIsoZLepsCollection"    type="string" lcioInType="ReconstructedParticle"> IsoLeps          </parameter>
+  <parameter name="InputPandoraPFOsCollection" type="string" lcioInType="ReconstructedParticle"> ArborPFOs        </parameter>
+  <parameter name="InputJetsCollection" type="string" lcioInType="ReconstructedParticle">        RefinedJets      </parameter> 
+  <!-- -->
+  <parameter name="FS100"    type="string"   >  INC2_0001100 </parameter>
+  <parameter name="FS101"    type="string"   >  INC2_0000011 </parameter>
+  <!--
+  -->
+  <!-- -->
+  <parameter name="FastOrFull"       type="int"   > 1 </parameter>
+  <parameter name="ShowMC"           type="int"   > 0 </parameter>
+  <!-- -->
+  <!-- -->
+  <parameter name="Verbosity"        type="string">  4       </parameter>
+  <parameter name="Luxury"           type="string">  0       </parameter>
+  <parameter name="DEBUG"            type="string">  2       </parameter>
+  <parameter name="MatchMC"          type="string">  0       </parameter>
+  <parameter name="kmfit"            type="string">  1       </parameter>
+  <parameter name="EventShape"       type="int"   >  1       </parameter>
+  <parameter name="TagFlavor"        type="int"   >  0       </parameter>
+  <parameter name="LinearSphericity" type="int"   >  1       </parameter>
+  <parameter name="Kappa"            type="string">  1.0     </parameter>
+  <parameter name="ECM"              type="string">  240.0   </parameter>
+</processor>
+
+</marlin>
