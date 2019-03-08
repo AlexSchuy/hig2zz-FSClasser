@@ -4,14 +4,14 @@
 [Common]
 # EDIT
 work=/path/to/work/dir
-# EDIT
 fs=${work}/final_state_selection
 es=${work}/event_selection
 fs_output=${fs}/output
+config=${base}/config
 
 [Event Selection]
-merged_fs=${Common:work}/merged_fs
-fs=${Common:work}/fs
+merged_fs=${Common:es}/merged_fs
+fs=${Common:es}/fs
 cache_dir=${Common:es}/cache
 plot_dir=${Common:es}/plots
 run_dir=${Common:es}/runs
@@ -19,15 +19,15 @@ ntuple_dir=${Common:es}/ntuples
 
 [Final State Selection]
 # EDIT
-machines=list,of,machine,addresses
-base_fs=${Common:base}/final-state-selection
+machines=list,of,machines
 log_dir=${Common:fs}/logs
 job_dir=${Common:fs}/jobs
+setup_dir=${Common:base}/scripts
 steering_dir=${Common:fs}/steering_files
-template_dir=${base_fs}/templates
-sample_table=${base_fs}/sample_table.ini
-num_events_table=${base_fs}/num_events.ini
-environment_setup_table=${base_fs}/setup_table.ini
+template_dir=${Common:base}/templates
+sample_table=${Common:config}/sample_table.ini
+num_events_table=${Common:config}/num_events.ini
+environment_setup_table=${Common:config}/setup_table.ini
 
 
 [Logging]
