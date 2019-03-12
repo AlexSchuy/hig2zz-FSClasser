@@ -132,9 +132,9 @@ def select_highest_pt_combinations(features, meta, version, dataset, use_progres
                               'Event'], version, dataset, processes, use_progressbar=use_progressbar)
     data = pd.concat(
         [pts[pts.columns.difference(features.columns)], features, meta], axis=1)
-    data = load.sort_values(['pid', 'rfid', 'Event', 'LeadingJetPt',
+    data = data.sort_values(['pid', 'rfid', 'Event', 'LeadingJetPt',
                              'SubLeadingJetPt', 'LeadingMuonPt', 'SubLeadingMuonPt'], ascending=False)
-    mask = ~load.duplicated(subset=['pid', 'rfid', 'Event'])
+    mask = ~data.duplicated(subset=['pid', 'rfid', 'Event'])
 
     return features[mask], meta[mask]
 
@@ -153,9 +153,9 @@ def select_highest_E_combinations(features, meta, version, dataset, use_progress
                             'SubLeadingEnMuonEn', 'Event'], version, dataset, processes, use_progressbar=use_progressbar)
     data = pd.concat(
         [E[E.columns.difference(features.columns)], features, meta], axis=1)
-    data = load.sort_values(['pid', 'rfid', 'Event', 'LeadingEnJetEn', 'SubLeadingEnJetEn',
+    data = data.sort_values(['pid', 'rfid', 'Event', 'LeadingEnJetEn', 'SubLeadingEnJetEn',
                              'LeadingEnMuonEn', 'SubLeadingEnMuonEn'],  ascending=False)
-    mask = ~load.duplicated(subset=['pid', 'rfid', 'Event'])
+    mask = ~data.duplicated(subset=['pid', 'rfid', 'Event'])
 
     return features[mask], meta[mask]
 
@@ -182,10 +182,10 @@ def select_ryuta_combinations(features, meta, version, dataset='cross_check', us
     selection = pd.concat([selection_features, selection_meta], axis=1)
     data = pd.concat([features, meta], axis=1)
     data = pd.concat(
-        [data, selection[selection.columns.difference(load.columns)]], axis=1)
+        [data, selection[selection.columns.difference(data.columns)]], axis=1)
     data['diff'] = np.absolute(data['RMass34'] - 91.2)
-    data = load.sort_values(['pid', 'rfid', 'Event', 'diff'])
-    mask = ~load.duplicated(subset=['pid', 'rfid', 'Event'])
+    data = data.sort_values(['pid', 'rfid', 'Event', 'diff'])
+    mask = ~data.duplicated(subset=['pid', 'rfid', 'Event'])
 
     return features[mask], meta[mask]
 

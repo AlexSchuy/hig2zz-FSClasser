@@ -23,7 +23,7 @@ import uproot
 
 from common import utils, validate
 from config import settings
-from data import process
+from data import process, load
 
 MERGED_INPUT_DIR = settings.get_setting('Event Selection', 'merged_fs')
 CACHE_DIR = settings.get_setting('Event Selection', 'cache_dir')
@@ -140,7 +140,7 @@ def load_data(data_keys, version, dataset, processes, use_progressbar=True):
         meta = pd.concat([meta, df[META_KEYS]], ignore_index=True)
 
     # Ensure that data is returned in a consistent order.
-    load.sort_index(axis=1, inplace=True)
+    data.sort_index(axis=1, inplace=True)
     meta.sort_index(axis=1, inplace=True)
 
     return data, meta
@@ -195,7 +195,7 @@ def _save_cache(data_keys, version, dataset, processes, use_progressbar=True):
             # entries for this process.
             if not dicts:
                 logging.warning('({}, {}) has no entries.'.format(version, p))
-                load.to_pickle(cache_filepath)
+                data.to_pickle(cache_filepath)
                 continue
 
             arrays = {k: np.concatenate(
@@ -214,14 +214,14 @@ def _save_cache(data_keys, version, dataset, processes, use_progressbar=True):
         if os.path.isfile(cache_filepath):
             cached = pd.read_pickle(cache_filepath)
             data = pd.concat(
-                [data, cached[cached.columns.difference(load.columns)]], axis=1)
+                [data, cached[cached.columns.difference(data.columns)]], axis=1)
 
         # Calculate meta information if necessary.
         if 'pid' not in data:
             data['pid'] = process.get_pid_map(version, dataset)[p]
 
-        load.sort_index(axis=1, inplace=True)
-        load.to_pickle(cache_filepath)
+        data.sort_index(axis=1, inplace=True)
+        data.to_pickle(cache_filepath)
 
 
 def _generate_derived_data(derived_keys, version, dataset, process):

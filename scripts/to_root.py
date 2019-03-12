@@ -14,8 +14,11 @@ RUN_DIR = settings.get_setting('Event Selection', 'run_dir')
 def write_root(run_dir, filename, X, weights):
     utils.makedirs(os.path.join(run_dir, 'ntuple'))
     filename = os.path.join(run_dir, 'ntuple', filename)
-    X['weights'] = weights
-    array2root(X.to_records(index=False), filename, 'HiggsTree', 'recreate')
+    X['weight'] = weights
+    r = X.to_records(index=False)
+    dtype = [(feature_name_map[n] if n in feature_name_map else n,d[0]) for n,d in r.dtype.fields.items()]
+    r = r.astype(dtype)
+    array2root(r, filename, 'HiggsTree', 'recreate')
 
 
 def to_root(run_dir):
@@ -56,12 +59,9 @@ def to_root(run_dir):
     X_selected = X_selected[output_features]
     X_selected, weights = process.by_group(version, dataset, process.get_signal_sm_zh_background_groups(
         version, dataset), y_selected, [X_selected], weight_type='expected')
-    write_root(run_dir=run_dir, filename='{}_sig.root'.format(
-        signal_process), X=X_selected['signal'], weights=weights['signal'])
-    write_root(run_dir=run_dir, filename='{}_sm_bkg.root'.format(
-        signal_process), X=X_selected['sm_background'], weights=weights['sm_background'])
-    write_root(run_dir=run_dir, filename='{}_zh_bkg.root'.format(
-        signal_process), X=X_selected['zh_background'], weights=weights['zh_background'])
+    write_root(run_dir=run_dir, filename='sig_nnh_zz.root', X=X_selected['signal'], weights=weights['signal'])
+    write_root(run_dir=run_dir, filename='bkg_sm.root', X=X_selected['sm_background'], weights=weights['sm_background'])
+    write_root(run_dir=run_dir, filename='bkg_llh_zz.root', X=X_selected['zh_background'], weights=weights['zh_background'])
 
 
 def main():
@@ -69,12 +69,12 @@ def main():
     parser = argparse.ArgumentParser(
         description='Write ntuples from events that passed analysis selection to root files for cross section X branching ratio and higgs width meaasurements.')
     parser.add_argument('--run_dir', default=None, help='The run dir to use.')
-
+    args = parser.parse_args()
     if args.run_dir:
         run_dir = os.path.join(RUN_DIR, args.run_dir)
     else:
         run_dir = utils.most_recent_dir()
-
+    to_root(run_dir)
 
 if __name__ == '__main__':
     main()

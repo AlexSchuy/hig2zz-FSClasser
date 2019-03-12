@@ -22,6 +22,7 @@ ntuple_dir=${Common:es}/ntuples
 machines=list,of,machines
 log_dir=${Common:fs}/logs
 job_dir=${Common:fs}/jobs
+validation_dir=${Common:fs}/validation
 setup_dir=${Common:base}/scripts
 steering_dir=${Common:fs}/steering_files
 template_dir=${Common:base}/templates

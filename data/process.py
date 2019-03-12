@@ -31,7 +31,7 @@ def get_cross_section(version, process):
     validate.check_version(version)
     config = ConfigParser()
     try:
-        config.read('cross_sections.ini')
+        config.read('config/cross_sections.ini')
     except Exception:
         logging.error('Unable to find cross_sections.ini file!')
         raise
@@ -39,13 +39,13 @@ def get_cross_section(version, process):
     return cross_section
 
 
-def get_num_expected_events(version, dataset, process, int_L=5000.0):
+def get_num_expected_events(version, dataset, process, int_L=5600.0):
     validate.check_version(version)
     validate.check_dataset(version, dataset)
     return int_L * get_cross_section(version, process)
 
 
-def get_num_MC_events(version, dataset, process):
+def get_num_MC_events(version, dataset, process, test_fraction=1.0):
     """Get the total number of Monte Carlo events that have been analyzed for 
     the given process for the given version and dataset.
     """
@@ -58,15 +58,15 @@ def get_num_MC_events(version, dataset, process):
     except Exception:
         logging.error('Unable to find num_events.ini!')
         raise
-    return config.getint(dataset, process)
+    return config.getint(dataset, process) * test_fraction
 
 
-def calculate_weight(version, dataset, process, int_L=5000):
+def calculate_weight(version, dataset, process, int_L=5600.0, test_fraction=1.0):
     """Return a weight to scale to expected yield."""
     validate.check_version(version)
     validate.check_dataset(version, dataset)
     N_expected = get_num_expected_events(version, dataset, process, int_L)
-    N_actual = get_num_MC_events(version, dataset, process)
+    N_actual = get_num_MC_events(version, dataset, process, test_fraction)
     logging.debug('{} {}: weight = {:.1f} / {:.1f} = {:.1f}'.format(version,
                                                                     process, N_expected, N_actual, N_expected / N_actual))
     return N_expected / N_actual
@@ -191,7 +191,7 @@ def get_zh_processes(version, dataset):
     validate.check_version(version)
     validate.check_dataset(version, dataset)
     signal = get_signal_process(version, dataset)
-    prefixes = [p for p in [('llh_zz', 'nnh_zz')] if p != signal]
+    prefixes = tuple(p for p in ['llh_zz', 'nnh_zz'] if p != signal)
     return get_processes(prefixes, version, dataset)
 
 
@@ -237,10 +237,10 @@ def get_zh_background_groups(version, dataset):
 def get_signal_sm_zh_background_groups(version, dataset):
     validate.check_version(version)
     validate.check_dataset(version, dataset)
-    return OrderedDict([('signal', [get_signal_process(version, dataset)]), ('sm_background', get_sm_processes(version, dataset))], ('zh_background', get_zh_processes(version, dataset)))
+    return OrderedDict([('signal', [get_signal_process(version, dataset)]), ('sm_background', get_sm_processes(version, dataset)), ('zh_background', get_zh_processes(version, dataset))])
 
 
-def by_group(version, dataset, groups, pids, A=None, weight_type=None):
+def by_group(version, dataset, groups, pids, A=None, weight_type=None, test_fraction=1.0):
     """Separation of data sets by group.
 
     Let A be a collection such that A = (a1, a2, ..., an). Then, this function
@@ -274,6 +274,10 @@ def by_group(version, dataset, groups, pids, A=None, weight_type=None):
         are in a group, maintain relative weighting between processes in the group
         according to expected yield. If 'unweighted', return weights = 
         np.ones(pids.shape[0]).
+
+    test_fraction : double, optional (default=1.0)
+        The fraction of total samples that are used for testing. Relevant only
+        if weight_type = expected.
     """
 
     # Validate input
@@ -304,7 +308,7 @@ def by_group(version, dataset, groups, pids, A=None, weight_type=None):
     if weight_type != 'unweighted':
         for unique_id in unique_ids:
             weights[pids == unique_id] = calculate_weight(
-                version, dataset, get_pid_map(version, dataset)[unique_id])
+                version, dataset, get_pid_map(version, dataset)[unique_id], test_fraction=test_fraction)
     weights = {k: utils.safe_concat(weights[pids == get_pid_map(version, dataset)[
                                     p]] for p in v) for k, v in groups.items()}
     empty_keys = [k for k in weights if weights[k] is None]

@@ -38,7 +38,7 @@ def cut_table(version, dataset, group_type, combination_type, selection_type):
     group_cut_df = pd.DataFrame(index=index, columns=groups.keys())
     for p in processes:
         raw_cut_df.loc['initial', p] = process.get_num_MC_events(
-            version, dataset, p)
+            version, dataset, p, test_fraction=0.5)
         raw_cut_df.loc['final_state_selection', p] = count(p, meta)
     for cut in cuts:
         meta = meta[cuts[cut]]
@@ -46,7 +46,7 @@ def cut_table(version, dataset, group_type, combination_type, selection_type):
         for p in processes:
             raw_cut_df.loc[cut, p] = count(p, meta)
     for k, v in groups.items():
-        w = np.array([process.calculate_weight(version, dataset, p)
+        w = np.array([process.calculate_weight(version, dataset, p, test_fraction=0.5)
                       for p in v])
         if cuts.shape[0] > 0:
             n_f = np.array([raw_cut_df.loc[cuts.columns[-1], p] for p in v])
@@ -58,7 +58,7 @@ def cut_table(version, dataset, group_type, combination_type, selection_type):
         [['final_state_selection'], cuts.columns.values])
     for k, v in groups.items():
         group_cut_df.loc[count_index, k] = np.sum([process.calculate_weight(
-            version, dataset, p)*raw_cut_df.loc[count_index, p] for p in v], axis=0)
+            version, dataset, p, test_fraction=0.5)*raw_cut_df.loc[count_index, p] for p in v], axis=0)
         group_cut_df.loc['initial', k] = np.sum(
             [process.get_num_expected_events(version, dataset, p) for p in v], axis=0)
     if cuts.shape[0] > 0:
@@ -76,8 +76,6 @@ def analyze_standard(run_dir):
     model = load.load_model(run_dir)
     X_test, y_test, test_index = load.load_train_test_data_from_run_dir(
         run_dir, 'test', get_indices=True)
-    import pdb
-    pdb.set_trace()
     config = utils.load_run_config(run_dir)
     model_name = config['DATA']['model']
     dataset = config['DATA']['dataset']
@@ -100,7 +98,7 @@ def analyze_standard(run_dir):
     if model_name == 'bdt':
         # Plot BDT response
         X, weights = process.by_group(version, dataset, process.get_signal_background_groups(
-            version, dataset), y_test, [y_expected], weight_type='normalized')
+            version, dataset), y_test, [y_expected], weight_type='normalized', test_fraction=0.5)
         feature_key = 'BDT_response'
         filepath = os.path.join(run_dir, 'plots', feature_key)
         plot.make_yuqian_style_hist(X, filepath, weights=weights, ranges=(
@@ -108,7 +106,7 @@ def analyze_standard(run_dir):
 
         # Plot BDT response for selected events
         X, weights = process.by_group(version, dataset, process.get_signal_background_groups(
-            version, dataset), y_test[y_expected > 0.5], [y_expected[y_expected > 0.5]], weight_type='expected')
+            version, dataset), y_test[y_expected > 0.5], [y_expected[y_expected > 0.5]], weight_type='expected', test_fraction=0.5)
         filepath = os.path.join(
             run_dir, 'plots', 'BDT_response (selected events)')
         plot.make_yuqian_style_hist(X, filepath, weights=weights, ranges=(
@@ -128,7 +126,6 @@ def analyze_standard(run_dir):
         zip(X_test.columns.values, model.named_steps['model'].feature_importances_))
     for feature_name, importance in sorted(feature_importance.items(), key=lambda kv: -kv[1]):
         print('{}: {}'.format(feature_name, importance))
-
     y_selected = y_test[y_expected > 0.5]
     show_surviving_processes(y_selected, version, dataset)
 
@@ -138,7 +135,7 @@ def show_surviving_processes(y_selected, version, dataset):
     print('Selected samples by process (weighted):')
     for ID, count in zip(IDs, counts):
         p = process.get_pid_map(version, dataset)[ID]
-        weight = process.calculate_weight(version, dataset, p)
+        weight = process.calculate_weight(version, dataset, p, test_fraction=0.5)
         print('\t{}: {} ({})'.format(p, count, count * weight))
 
 

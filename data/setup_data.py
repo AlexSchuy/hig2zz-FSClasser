@@ -38,7 +38,7 @@ def merge_root_files(version, datasets, mc_events_per_file):
                 MERGED_INPUT_DIR, version, dataset, p_name, p_name + '.root')
             files = glob.glob(os.path.join(p, '*.root'))
             config[dataset][p_name] = str(mc_events_per_file * len(files))
-            args = '. /phys/users/gwatts/bin/CommonScripts/configASetup.sh && lsetup root && hadd -f {} {}'.format(
+            args = 'hadd -f {} {}'.format(
                 merged_file_path, os.path.join(INPUT_DIR, version, dataset, p_name, '*'))
             procs.append(subprocess.Popen(args, executable='/bin/bash',
                                           shell=True, stdout=open(os.devnull, 'w')))
@@ -79,7 +79,7 @@ def preprocess_data(version, datasets=None):
 
     for input_path, output_path in zip(input_paths, output_paths):
         utils.makedirs(output_path)
-        cmd = """source /phys/users/gwatts/bin/CommonScripts/configASetup.sh && lsetup root && root -q -b -x 'preprocessing.cpp("{}", "{}")'""".format(
+        cmd = """root -q -b -x 'data/preprocessing.cpp("{}", "{}")'""".format(
             input_path, output_path)
         returncode = subprocess.Popen(
             cmd, shell=True, executable='/bin/bash').wait()

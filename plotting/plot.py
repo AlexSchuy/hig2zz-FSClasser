@@ -131,7 +131,7 @@ def make_yuqian_style_hist(X, filepath, **kwargs):
               lw=2, histtype='stepfilled', **kwargs)
 
 
-def make_standard_hist(version, dataset, processes, feature_keys, weight_type, group_type, combination_type='highest_pt', selection_type=None, selection_stage=-1, indices=None, plot_dir=None, **kwargs):
+def make_standard_hist(version, dataset, processes, feature_keys, weight_type, group_type, combination_type='highest_pt', selection_type=None, selection_stage=-1, indices=None, test_fraction=1.0, plot_dir=None, **kwargs):
     if isinstance(feature_keys, str):
         feature_keys = [feature_keys]
 
@@ -140,7 +140,7 @@ def make_standard_hist(version, dataset, processes, feature_keys, weight_type, g
                               selection_type=selection_type, selection_stage=selection_stage, use_progressbar=False)
     groups = process.get_groups(version, dataset, group_type)
     features, weights = process.by_group(version, dataset, groups, meta['pid'], [
-                                         df], weight_type=weight_type)
+                                         df], weight_type=weight_type, test_fraction=test_fraction)
 
     for feature_key in feature_keys:
         # Make plots.
@@ -169,14 +169,14 @@ def make_standard_hist(version, dataset, processes, feature_keys, weight_type, g
                       filepath, weights=weights, ylabel=ylabel, feature_key=feature_key, histtype='step', **kwargs)
 
 
-def make_standard_2d_hist(version, dataset, processes, feature_key_x, feature_key_y, weight_type, group_type, combination_type='highest_pt', selection_type=None, selection_stage=-1, indices=None, filepath=None, histtype='step', **kwargs):
+def make_standard_2d_hist(version, dataset, processes, feature_key_x, feature_key_y, weight_type, group_type, combination_type='highest_pt', selection_type=None, selection_stage=-1, indices=None, test_fraction=1.0, filepath=None, histtype='step', **kwargs):
 
     # Get data and separate it into appropriate groups.
     df, meta = load.load_data([feature_key_x, feature_key_y], version, dataset, processes, indices=indices,
                               combination_type=combination_type, selection_type=selection_type, selection_stage=selection_stage, use_progressbar=False)
     groups = process.get_groups(version, dataset, group_type)
     features, weights = process.by_group(version, dataset, groups, meta['pid'], [
-                                         df], weight_type=weight_type)
+                                         df], weight_type=weight_type, test_fraction=test_fraction)
     # Make plots.
     if filepath is None:
         filepath = os.path.join(PLOT_DIR, version, dataset, weight_type, group_type, str(

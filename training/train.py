@@ -87,16 +87,16 @@ def main():
                            combination_type=args.combination_type, selection_type=args.selection_type, selection_stage=args.selection_stage)
     X_train, y_train = load.load_train_test_data_from_run_dir(
         run_dir, data_type='train')
-    y_train = utils.get_binary_labels(y_train, version, args.dataset)
+    y_binary = utils.get_binary_labels(y_train, version, args.dataset)
     if args.use_weights:
         weights = np.ones(y_train.shape[0])
         for pid in np.unique(y_train):
-            process = process.get_pid_map(version, args.dataset)[pid]
-            weights[y_train == pvid] = process.calculate_weight(
-                version, args.dataset, process)
-        train(X_train, y_train, model, weights=weights)
+            p = process.get_pid_map(version, args.dataset)[pid]
+            weights[y_train == pid] = process.calculate_weight(
+                version, args.dataset, p)
+        train(X_train, y_binary, model, weights=weights)
     else:
-        train(X_train, y_train, model)
+        train(X_train, y_binary, model)
     joblib.dump(model, os.path.join(run_dir, 'model.pkl'))
 
 

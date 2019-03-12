@@ -9,12 +9,13 @@ verify_ssl = true
 pre-commit = "*"
 numpy = "*"
 pandas = "*"
-progressbar = "*"
 uproot = "*"
 root-numpy = "*"
 matplotlib = "*"
 graphviz = "*"
 sklearn = "*"
+progressbar2 = "*"
+tkinter = "*"
 
 [requires]
 python_version = "3.6"
