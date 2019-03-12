@@ -15,7 +15,6 @@ matplotlib = "*"
 graphviz = "*"
 sklearn = "*"
 progressbar2 = "*"
-tkinter = "*"
 
 [requires]
 python_version = "3.6"

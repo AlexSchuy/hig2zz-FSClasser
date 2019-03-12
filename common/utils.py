@@ -5,16 +5,17 @@ module and may have broad use.
 """
 
 import errno
+import glob
 import logging
 import os
-import glob
 from configparser import ConfigParser
 
-from config import settings
 import numpy as np
 import pandas as pd
-from data import process
+
 from common import validate
+from config import settings
+from data import process
 
 
 def safe_concat(arrs, default=None, **kwargs):

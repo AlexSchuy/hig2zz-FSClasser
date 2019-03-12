@@ -1,6 +1,7 @@
 import logging
 
 import progressbar
+
 from config import settings
 
 

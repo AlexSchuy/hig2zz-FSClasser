@@ -1,8 +1,9 @@
-from configparser import ConfigParser
 import argparse
+from configparser import ConfigParser
 
+from common import main_setup, utils
 from data import process
-from common import utils, main_setup
+
 
 def main():
     main_setup.setup()

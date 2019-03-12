@@ -6,6 +6,7 @@ import os
 
 import numpy as np
 import pandas as pd
+
 from config import settings
 from data import process
 
@@ -25,6 +26,7 @@ def check_consistent_length(a1, a2):
 
 
 def check_dataset(version, dataset):
-    dataset_path = os.path.join(settings.get_setting('Event Selection', 'merged_fs'), version, dataset)
+    dataset_path = os.path.join(settings.get_setting(
+        'Event Selection', 'merged_fs'), version, dataset)
     assert os.path.isdir(
         dataset_path), '{} is not a valid directory!'.format(dataset_path)

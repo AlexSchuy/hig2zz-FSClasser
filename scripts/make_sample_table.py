@@ -5,7 +5,6 @@ from glob import glob
 
 from config import settings
 
-
 SAMPLE_TABLE = settings.get_setting('Final State Selection', 'sample_table')
 V1_B_SAMPLE_DIR = os.path.join(
     '/', 'cefs', 'data', 'RecData', 'CEPC250', 'CEPC_v1', '4fermions')

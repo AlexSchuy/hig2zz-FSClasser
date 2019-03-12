@@ -13,6 +13,7 @@ from collections import OrderedDict, namedtuple
 from configparser import ConfigParser
 
 import numpy as np
+
 from common import utils, validate
 from config import settings
 

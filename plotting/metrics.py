@@ -135,7 +135,8 @@ def show_surviving_processes(y_selected, version, dataset):
     print('Selected samples by process (weighted):')
     for ID, count in zip(IDs, counts):
         p = process.get_pid_map(version, dataset)[ID]
-        weight = process.calculate_weight(version, dataset, p, test_fraction=0.5)
+        weight = process.calculate_weight(
+            version, dataset, p, test_fraction=0.5)
         print('\t{}: {} ({})'.format(p, count, count * weight))
 
 

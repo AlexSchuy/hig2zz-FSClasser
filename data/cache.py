@@ -23,7 +23,7 @@ import uproot
 
 from common import utils, validate
 from config import settings
-from data import process, load
+from data import load, process
 
 MERGED_INPUT_DIR = settings.get_setting('Event Selection', 'merged_fs')
 CACHE_DIR = settings.get_setting('Event Selection', 'cache_dir')
